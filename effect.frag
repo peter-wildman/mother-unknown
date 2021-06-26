@@ -7,30 +7,33 @@ varying vec2 vTexCoord;
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 
+uniform float x;
+uniform float y;
+vec4 pup;
+
 // how much to displace by (controlled by mouse)
 uniform float amt;
 
 void main() {
-
+  vec2 mouse = vec2(x,y);
   vec2 uv = vTexCoord;
   // the texture is loaded upside down and backwards by default so lets flip it
   uv = 1.0 - uv;
-
-  // get the webcam as a vec4 using texture2D
-  vec4 cam = texture2D(tex0, uv);
-
-  // lets get the average color of the rgb values
-  float avg = dot(cam.rgb, vec3(0.33333));
-
+  //try to make it between 0.55 and 0.45
+  float dispAmt = 0.55;
   // then spread it between -1 and 1
-  avg = avg * 2.0 - 1.0;
+  dispAmt = dispAmt * 2.0 - 1.0;
 
-  // we will displace the image by the average color times the amt of displacement 
-  float disp = avg * amt;
+  // we will displace the image by the average color times the amt of displacement
+  float mouseDist = distance(mouse,uv);
+  float mouseDistMapped = mouseDist * 2.0 -1.0;
+  float disp = dispAmt * mouseDistMapped;
+  //float disp = avg * amt;
 
   // displacement works by moving the texture coordinates of one image with the colors of another image
   // add the displacement to the texture coordinages
   vec4 pup = texture2D(tex1, uv + disp);
+
 
   // output the image
   gl_FragColor = pup;
