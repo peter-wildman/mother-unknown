@@ -2,9 +2,15 @@
 let archiveImg;
 let bufferImg;
 let dispMap;
+let gImg;
+
+let colourVal01 = 0;
+let colourVal02 = 1;
+let colourVal03 = 2;
 
 function preload(){
   archiveImg = loadImage('mortonObituary.jpg');
+  gImg = loadImage('e.png');
 }
 
 function setup() {
@@ -13,10 +19,8 @@ function setup() {
   pixelDensity(1);
   dispMap = createGraphics(600, 600);
   bufferImg = createImage(archiveImg.width,archiveImg.height);
-  dispMap.fill(0);
-  dispMap.textSize(790);
-  dispMap.text('G',10,580);
-  //dispMap.ellipse(dispMap.width/2,dispMap.height/2,dispMap.width)
+  //dispMap.scale(2);
+  dispMap.image(gImg,0,0);
 }
 
 function draw() {
@@ -65,18 +69,26 @@ function draw() {
             vertBool = 0;
             vertDir = 1;
           }
+          //keeps movement constrained inside bounds of image
+          if(x >= 0 && x <= bufferImg.width){
+            //this takes the black pixels as the map
+            if(dispMap.pixels[mapIndex+3] != 0){
+              //this algorithm covers all settings
+              displacement = index+((archiveImg.width*4)*vertDir*vertBool)+horizBool*4*horizDir;
+              //replace
+              archiveImg.pixels[index]   = bufferImg.pixels[displacement+colourVal01];
+              archiveImg.pixels[index+1] = bufferImg.pixels[displacement+colourVal02];
+              archiveImg.pixels[index+2] = bufferImg.pixels[displacement+colourVal03];
+              if(colourVal01 != 0 || colourVal02 != 1 || colourVal03 != 2){
+                archiveImg.pixels[index+3] = 125;
+              } else {
+                archiveImg.pixels[index+3] = 255;
+              }
 
-          //this takes the black pixels as the map
-          if(dispMap.pixels[mapIndex+3] != 0){
-            //this algorithm covers all settings
-            displacement = index+((archiveImg.width*4)*vertDir*vertBool)+horizBool*4*horizDir;
-            //replace
-            archiveImg.pixels[index]   = bufferImg.pixels[displacement];
-            archiveImg.pixels[index+1] = bufferImg.pixels[displacement+1];
-            archiveImg.pixels[index+2] = bufferImg.pixels[displacement+2];
-            archiveImg.pixels[index+3] = 255;
-            //dispMap.pixels[mapIndex+3] = 0;
+              //dispMap.pixels[mapIndex+3] = 0;
+            }
           }
+
           xCount++;
         }
         yCount++;
@@ -95,4 +107,18 @@ function draw() {
 
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
+}
+
+function keyPressed(){
+  if(key == 'q') colourVal01--;
+  if(key == 'w') colourVal01++;
+  if(key == 'a') colourVal02--;
+  if(key == 's') colourVal02++;
+  if(key == 'z') colourVal03--;
+  if(key == 'x') colourVal03++;
+  if(key == 'd'){
+    colourVal01 = 0;
+    colourVal02 = 1;
+    colourVal03 = 2;
+  }
 }
